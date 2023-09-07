@@ -1,6 +1,6 @@
 import cv2
 
-name = 'Hayden' #replace with your name
+name = input("Name: ")
 
 cam = cv2.VideoCapture(0)
 
@@ -23,9 +23,9 @@ while True:
         break
     elif k%256 == 32:
         # SPACE pressed
-        img_name = "dataset/"+ name +"/image_{}.jpg".format(img_counter)
+        img_name = "dataset/"+ name +"/image_" + str(format(img_counter)) + ".jpg"
         cv2.imwrite(img_name, frame)
-        print("{} written!".format(img_name))
+        print(image_name + " written!")
         img_counter += 1
 
 cam.release()
