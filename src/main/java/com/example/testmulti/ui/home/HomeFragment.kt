@@ -76,7 +76,7 @@ class HomeFragment : Fragment() {
 
         CoroutineScope(Dispatchers.IO).launch {
             // Do the POST request and get response
-            val response = service.createEmployee(requestBody)
+            val response = service.sendRequest(requestBody)
 
             withContext(Dispatchers.Main) {
                 //if (response.isSuccessful) {
