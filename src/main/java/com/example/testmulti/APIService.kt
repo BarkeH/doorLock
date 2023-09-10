@@ -21,7 +21,7 @@ interface APIService {
     // ...
 
     @POST("/")
-    suspend fun createEmployee(@Body requestBody: RequestBody): Response<ResponseBody>
+    suspend fun sendRequest(@Body requestBody: RequestBody): Response<ResponseBody>
 
     // ...
 }
