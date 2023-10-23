@@ -1,31 +1,39 @@
-from imutils import paths
-import face_recognition
+import time
+import zmq
 import cv2
+
+from photos import photoCapture
+from train import retrain
+from recogniseWithName import recognise
+
 import pickle
-import os
 
-def retrain():
-    filePaths = "dataset/"
+data = pickle.loads(open("encodings.pickle", "rb").read())
 
-    imagePaths = list(paths.list_images(filePaths))
-    print(imagePaths)
 
-    names = []
-    encodings = []
-    for (i,imagePath) in enumerate(imagePaths):
-        print("Training image " + str(i) + "/" + str(len(imagePaths)))
-        name = imagePath.split(os.path.sep)[-2]
-        image = cv2.imread(imagePath)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+context = zmq.Context()
+socket = context.socket(zmq.REP)
+socket.bind("tcp://*:4444")
+socket.RCVTIMEO = 1000
+while True:
+    try:
+        message = socket.recv()
+        print("Received request: {}".format(message))
+        if message == b"take photo":
+            photoCapture("bob")
+            socket.send(b"done")
+        elif message == b"retrain":
+            retrain()
+            socket.send(b"done")
+        elif message == b"lock":
+            print("TODO Lock")
+            socket.send(b"done")
+        elif message == b"unlock":
+            print("TODO unlock")
+            socket.send(b"done")
+        else:
+            socket.send(b"failed")
+    except zmq.Again:
+        print("timeout")
 
-        face_locations = face_recognition.face_locations(image, model="hog")
-        face_encodings = face_recognition.face_encodings(image, face_locations)
-
-        for encoding in face_encodings:
-            names.append(name)
-            encodings.append(encoding)
-
-    print("Dumping to file")
-    data = {"encodings": encodings, "name": names}
-    f = open("encodings.pickle", "wb")
-    f.write(pickle.dumps(data))
+    recognise(data,cv2)
