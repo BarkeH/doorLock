@@ -1,19 +1,16 @@
-import face_recognition
-from imutils.video import VideoStream, FPS
 import imutils
 import pickle
 import time
-import cv2
 
 vs = VideoStream(src = 0, framerate = 10).start()
 
 time.sleep(2.0)
 
 fps = FPS().start()
-data = pickle.loads(open("encodings.pickle", "rb").read())
+#data = pickle.loads(open("encodings.pickle", "rb").read())
 currentname = ""
 
-while True:
+def recognise(data,cv2):
     frame = vs.read()
     frame = imutils.resize(frame, width=500)
 
@@ -25,22 +22,22 @@ while True:
     for encoding in encodings:
         matches = face_recognition.compare_faces(data["encodings"], encoding)
         name = "Unknown"
-        
+
         if True in matches:
             matchedIdxs = [i for (i,b) in enumerate(matches) if b]
 
             counts = {}
-            
+
             for i in matchedIdxs:
                 name = data["name"][i]
                 counts[name] = counts.get(name, 0) + 1
 
             name = max(counts, key=counts.get)
 
-            if currentname != name:
-                currentname = name
-                print(name)
-
+            #if currentname != name:
+            #    currentname = name
+            #    print(name)
+            print(name)
 
     for (top, right, bottom, left) in boxes:
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 225), 2)
@@ -49,7 +46,4 @@ while True:
     cv2.imshow("test", frame)
     fps.update()
 
-    key = cv2.waitKey(1) & 0xFF
-    if key == ord("q"):
-        break
 fps.stop()
