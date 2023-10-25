@@ -1,15 +1,18 @@
-import time
-import zmq
-import cv2
+import numpy as np
+from io import BytesIO
 
 from photos import photoCapture
 from train import retrain
 from recogniseWithName import recognise
 
+import serial
+
 import pickle
 
 data = pickle.loads(open("encodings.pickle", "rb").read())
 
+arduino = serial.Serial(port='/dev/ttyACM0')
+arduino.flush()
 
 context = zmq.Context()
 socket = context.socket(zmq.REP)
@@ -26,14 +29,20 @@ while True:
             retrain()
             socket.send(b"done")
         elif message == b"lock":
-            print("TODO Lock")
+            send_string = "l\n"
+            arduino.write(send_string.encode('utf-8'))
             socket.send(b"done")
         elif message == b"unlock":
-            print("TODO unlock")
+            send_string = "u\n"
+            arduino.write(send_string.encode('utf-8'))
             socket.send(b"done")
+        elif message == b"camera":
+            frame = recognise(data)
+            np_bytes = BytesIO()
+            np.save(np_bytes, frame, allow_pickle=True)
+
+            socket.send(np_bytes.getvalue())
         else:
             socket.send(b"failed")
     except zmq.Again:
         print("timeout")
-
-    recognise(data,cv2)
