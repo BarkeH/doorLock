@@ -10,7 +10,7 @@ fps = FPS().start()
 #data = pickle.loads(open("encodings.pickle", "rb").read())
 currentname = ""
 
-def recognise(data,cv2):
+def recognise(data):
     frame = vs.read()
     frame = imutils.resize(frame, width=500)
 
@@ -45,5 +45,9 @@ def recognise(data,cv2):
         cv2.putText(frame, name, (left, y), cv2.FONT_HERSHEY_SIMPLEX, .8, (0, 255, 25), 2)
     cv2.imshow("test", frame)
     fps.update()
+    key = cv2.waitKey(1) & 0xFF
+
+    return frame
+
 
 fps.stop()
